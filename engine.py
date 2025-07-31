@@ -1,36 +1,60 @@
 import math
 import matplotlib as plt
 
-
 class Value:
     def __init__(self, data, _children=(), _op=''):
         self.data = data
         self._prev = set(_children)
         self.op = _op
-        self.grad = 0
+        self.grad = 0.
         self._backward = lambda: None
 
     def __repr__(self):
         return (f"value(data={self.data})")
 
     def __add__(self, right):
+        right = right if isinstance(right, Value) else Value(right)
         out = Value(self.data + right.data, (self, right), '+')
 
         def _backward():
-            self.grad = 1.0 * out.grad
-            other.grad = 1.0 * out.grad
+            self.grad += 1.0 * out.grad
+            right.grad += 1.0 * out.grad
         
         out._backward = _backward
         return (out)
 
+    def __radd__(self, right):
+        return (self + right)
+
     def __mul__(self, right):
+        right = right if isinstance(right, Value) else Value(right)
         out = Value (self.data * right.data, (self, right), '*')
         def _backward():
-            self.grad = other.data * out.grad
-            other.grad = self.data * out.grad
+            self.grad += right.data * out.grad
+            right.grad += self.data * out.grad
 
         out._backward = _backward
         return (out)
+
+    def __rmul__(self, right):
+        return (self * right)
+
+    def __pow__(self, right):
+        assert isinstance(other, (int, float))
+        out = Value(self.data**other, (self,), f'**{other}')
+
+        def _backward():
+            self.grad += other * (self.data ** (other -1)) * out.grad
+        out._backward = _backward
+
+    def __truediv__(this, right):
+        return self * right ** -1
+
+    def __neg__(self):
+        return self * -1
+
+    def __sub__(self, other):
+        return self + (-other)
 
     def tanh(self):
         n = self.data
@@ -38,7 +62,17 @@ class Value:
         out = Value(t, (self, ), "tanh")
 
         def _background():
-            self.grad = out.grad = (1 - t**2) * out.grad
+            self.grad += (1 - t**2) * out.grad
+
+        out._backward = _backward
+        return out
+
+    def exp(self):
+        n = self.data
+        out = Value(math.exp(this.data), (self, ), "exp")
+
+        def _background():
+            self.grad += out.data * out.grad
 
         out._backward = _backward
         return out
@@ -49,18 +83,25 @@ class Value:
         def build_topo(v):
             if v not in visited:
                 visited.add(v)
-                for child in v.prev:
+                for child in v._prev:
                     build_topo(child)
                 topo.append(v)
         build_topo(self)
 
         self.grad = 1
-        for v in reverse(topo):
+        for v in reversed(topo):
             v._backward()
 
 
 a = Value(2.0)
 b = Value(-3.0)
+c = a * b
+d = c + 5.0
 print(a)
 print(b)
-print(a + b)
+print(c)
+print(d)
+print(a.op)
+d.backward()
+print(a.data)
+print(a.grad)
