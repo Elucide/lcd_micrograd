@@ -40,12 +40,14 @@ class Value:
         return (self * right)
 
     def __pow__(self, right):
-        assert isinstance(other, (int, float))
-        out = Value(self.data**other, (self,), f'**{other}')
+        assert isinstance(right, (int, float))
+        out = Value(self.data**right, (self,), f'**{right}')
 
         def _backward():
-            self.grad += other * (self.data ** (other -1)) * out.grad
+            self.grad += right * (self.data ** (right -1)) * out.grad
         out._backward = _backward
+
+        return out
 
     def __truediv__(this, right):
         return self * right ** -1
@@ -53,15 +55,15 @@ class Value:
     def __neg__(self):
         return self * -1
 
-    def __sub__(self, other):
-        return self + (-other)
+    def __sub__(self, right):
+        return self + (-right)
 
     def tanh(self):
         n = self.data
-        t = (math.exp(2 * n) - 1) / (math.exp(2 * x) + 1)
+        t = (math.exp(2 * n) - 1) / (math.exp(2 * n) + 1)
         out = Value(t, (self, ), "tanh")
 
-        def _background():
+        def _backward():
             self.grad += (1 - t**2) * out.grad
 
         out._backward = _backward
@@ -71,7 +73,7 @@ class Value:
         n = self.data
         out = Value(math.exp(this.data), (self, ), "exp")
 
-        def _background():
+        def _backward():
             self.grad += out.data * out.grad
 
         out._backward = _backward
@@ -92,17 +94,3 @@ class Value:
         for v in reversed(topo):
             v._backward()
 
-
-a = Value(2.0)
-b = Value(-3.0)
-c = a * b
-d = c + 5.0
-print(a)
-print(b)
-print(c)
-print(d)
-print(a.op)
-d.backward()
-print(a.data)
-print(a.grad)
-print("coucou")
