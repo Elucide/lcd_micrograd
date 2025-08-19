@@ -2,6 +2,20 @@ import random
 from engine import Value
 
 class Neuron:
+    """
+                     ········                       
+      weights in     :NEURON:                       
+                     ········                       
+         W0                                         
+         XXX            XXXXXXX                     
+            XXXX      XX       XX             XX    
+         Wk     XXXX X           X tanh(out)    XX  
+          XXXXXXXXXXXX   bias    XXXXXXXXXXXXXXXXXX 
+                XXX  X           X              XX  
+        Wnin XXX      X        XX             XX    
+           XX           XXXXXXX                     
+
+    """
     def __init__(self, nin):
         self.w = [Value(random.uniform(-1, 1)) for _ in range(nin)]
         self.b = Value(random.uniform(-1, 1))
@@ -40,6 +54,19 @@ class MLP:
     def parameters(self):
         return [p for layer in self.layers for p in layer.parameters()]
 
+    def train(self, xs, ys, n_iter, learning_rate):
+        for k in range(n_iter):
+            ypred = [n(x) for x in xs]
+            ypred = [x[0] for x in ypred]
+            loss = sum((yout - ygt) ** 2 for ygt, yout in zip(ys, ypred))
+            for p in n.parameters():
+                p.grad =- 0.0
+            loss.backward()
+            for p in n.parameters():
+                p.data += -learning_rate * p.grad
+            print (k, loss.data)
+
+
 
 
 #x = [2.0, 3.0]
@@ -54,16 +81,8 @@ xs = [
 
 ys = [1.0, -1.0, -1.0, 1.0]
 
-for k in range(20):
-    ypred = [n(x) for x in xs]
-    ypred = [x[0] for x in ypred]
-    loss = sum((yout - ygt) ** 2 for ygt, yout in zip(ys, ypred))
-    for p in n.parameters():
-        p.grad =- 0.0
-    loss.backward()
-    for p in n.parameters():
-        p.data += -0.1 * p.grad
-    print (k, loss.data)
+
+n.train(xs, ys, 40, 0.1)
 
 for x in xs:
     print(n(x))
