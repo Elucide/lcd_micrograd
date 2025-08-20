@@ -1,10 +1,7 @@
-
-
-
 import math
 import matplotlib as plt
 
-print("wesh ad")
+print("en fait nan")
 
 class Value:
     def __init__(self, data, _children=(), _op=''):
