@@ -1,5 +1,10 @@
+
+
+
 import math
 import matplotlib as plt
+
+print("wesh ad")
 
 class Value:
     def __init__(self, data, _children=(), _op=''):

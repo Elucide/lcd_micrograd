@@ -66,10 +66,6 @@ class MLP:
                 p.data += -learning_rate * p.grad
             print (k, loss.data)
 
-
-
-
-#x = [2.0, 3.0]
 n = MLP(3 , [4, 4, 1])
 
 xs = [
@@ -81,8 +77,11 @@ xs = [
 
 ys = [1.0, -1.0, -1.0, 1.0]
 
-
 n.train(xs, ys, 40, 0.1)
+
+print(str(ys))
 
 for x in xs:
     print(n(x))
+
+print (str(n.parameters()))
